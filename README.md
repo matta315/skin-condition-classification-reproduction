@@ -22,4 +22,12 @@ This reproduction study focuses on evaluating how deep learning models perform i
 - Paper URL: https://arxiv.org/abs/2104.09957
 
 ## Repository Structure
+skin-condition-classification-reproduction/
+├── data/                  # Data processing and loading scripts
+├── models/               # Model architecture and training
+├── notebooks/           # Analysis notebooks
+├── results/             # Experimental results and visualizations
+├── src/                 # Source code
+├── requirements.txt     # Project dependencies
+└── README.md           # Project documentation
 

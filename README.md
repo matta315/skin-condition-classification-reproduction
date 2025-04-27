@@ -22,6 +22,7 @@ This reproduction study focuses on evaluating how deep learning models perform i
 - Title: "Evaluating Deep Neural Networks Trained on Clinical Images in Dermatology with the Fitzpatrick 17k Dataset"
 - Authors: Matthew Groh, Caleb Harris, Luis Soenksen, et al.
 - Paper URL: https://arxiv.org/abs/2104.09957
+- Data URL: https://github.com/mattgroh/fitzpatrick17k/blob/main/fitzpatrick17k.csv
 
 ## Repository Structure
 ```skin-condition-classification-reproduction/
@@ -32,8 +33,6 @@ This reproduction study focuses on evaluating how deep learning models perform i
 ├── src/                 # Source code
 ├── requirements.txt     # Project dependencies
 └── README.md           # Project documentation```
-
------
 
 ## Requirements
 

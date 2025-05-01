@@ -36,3 +36,24 @@ class SkinConditionDataset(Dataset):
             'label': label,
             'fitzpatrick_scale': fitzpatrick_scale
         }
+
+
+# In src/data/dataset.py
+class FitzpatrickDataset(Dataset):
+    def __init__(self, data_dir, split='train', transform=None):
+        self.data_dir = os.path.join(data_dir, split)
+        self.transform = transform
+        
+        # Get all image paths and labels
+        self.samples = []
+        for condition in ['benign', 'malignant', 'non_neoplastic']:
+            condition_dir = os.path.join(self.data_dir, condition)
+            for skin_type in range(1, 7):
+                type_dir = os.path.join(condition_dir, f'type_{skin_type}')
+                if os.path.exists(type_dir):
+                    for img_name in os.listdir(type_dir):
+                        self.samples.append({
+                            'path': os.path.join(type_dir, img_name),
+                            'condition': condition,
+                            'skin_type': skin_type
+                        })

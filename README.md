@@ -4,13 +4,19 @@ A reproduction study examining AI bias in dermatology classification across diff
 ## Project Overview
 This reproduction study focuses on evaluating how deep learning models perform in classifying skin conditions across different skin types using the Fitzpatrick 17k Dataset. Our goal is to reproduce the paper's key findings about AI bias in dermatology classification across different skin types.
 
+There are going to be 4 stages of the project
+Stage 1:
+Stage 2:
+Stage 3:
+Stage 4:
+
 ### Key Components
 - Implementation of VGG-16 based classification model
 - Analysis across different Fitzpatrick skin types
 - Evaluation of model performance on various skin conditions
 - Reproduction of key metrics and results
 
-** VGG-16 is a convolutional neural network (CNN) architecture that's widely used for image classification tasks
+** VGG-16 is a **convolutional neural network (CNN)** architecture that's widely used for image classification tasks
 
 ### Dataset
 - Fitzpatrick 17k Dataset
@@ -26,13 +32,33 @@ This reproduction study focuses on evaluating how deep learning models perform i
 
 ## Repository Structure
 ```skin-condition-classification-reproduction/
-├── data/                  # Data processing and loading scripts
-├── models/               # Model architecture and training
-├── notebooks/           # Analysis notebooks
-├── results/             # Experimental results and visualizations
-├── src/                 # Source code
-├── requirements.txt     # Project dependencies
-└── README.md           # Project documentation```
+skin-condition-classification-reproduction/
+├── lib/                              
+│   ├── data/                         # Downloaded Fitzpatrick17k dataset
+│   └── weights/                      # Saved model weights
+│
+├── notebooks/
+│   ├── 1_data_preparation.ipynb      # Data loading and preprocessing
+│   ├── 2_model_implementation.ipynb  # VGG16 model implementation
+│   ├── 3_training_evaluation.ipynb   # Training and basic evaluation
+│   └── 4_fitzpatrick_analysis.ipynb  # Skin type specific analysis
+│
+├── src/
+│   ├── data/
+│   │   ├── data_loader.py           # Data loading utilities
+│   │   └── transforms.py            # Image transformations
+│   │
+│   ├── models/
+│   │   ├── vgg16_model.py          # VGG16 model architecture
+│   │   └── training.py             # Training functions
+│   │
+│   └── evaluation/
+│       ├── metrics.py              # Evaluation metrics
+│       └── fitzpatrick_analyzer.py # Skin type analysis
+│
+├── requirements.txt
+└── README.md
+
 
 ## Requirements
 
@@ -40,6 +66,10 @@ To install requirements:
 
 ```setup
 pip install -r requirements.txt
+
+python3 -m venv venv
+
+source venv/bin/activate && pip install panda
 ```
 
 >📋  Describe how to set up the environment, e.g. pip/conda/docker commands, download datasets, etc...
@@ -71,23 +101,10 @@ python eval.py --model-file mymodel.pth --benchmark imagenet
 
 ## Pre-trained Models
 
-You can download pretrained models here:
 
-- [My awesome model](https://drive.google.com/mymodel.pth) trained on ImageNet using parameters x,y,z. 
-
->📋  Give a link to where/how the pretrained models can be downloaded and how they were trained (if applicable).  Alternatively you can have an additional column in your results table with a link to the models.
 
 ## Results
 
-Our model achieves the following performance on :
-
-### [Image Classification on ImageNet](https://paperswithcode.com/sota/image-classification-on-imagenet)
-
-| Model name         | Top 1 Accuracy  | Top 5 Accuracy |
-| ------------------ |---------------- | -------------- |
-| My awesome model   |     85%         |      95%       |
-
->📋  Include a table of results from your paper, and link back to the leaderboard for clarity and context. If your main result is a figure, include that figure and link to the command or notebook to reproduce it. 
 
 
 ## Contributing

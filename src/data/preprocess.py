@@ -63,28 +63,6 @@ def update_df_with_image_paths(df, base_dir):
     
     return df_with_images
 
-# # Organize function
-# def organize_images(csv_file, output_dir):
-#     """
-#     Organize images by condition and skin type
-#     """
-#     df = pd.read_csv(csv_file)
-    
-#     for _, row in df.iterrows():
-#         # Get paths
-#         condition = row['three_partition_label']
-#         skin_type = f"type_{row['fitzpatrick_scale']}"
-        
-#         # Create directories if they don't exist
-#         save_dir = os.path.join(output_dir, condition, skin_type)
-#         os.makedirs(save_dir, exist_ok=True)
-        
-#         # Download and save image
-#         image_url = row['url']
-#         image_path = os.path.join(save_dir, f"{row['md5hash']}.jpg")
-#         if not os.path.exists(image_path):
-#             download_image(image_url, image_path)
-
 def create_data_splits(df_with_images,base_dir='data/processed/images',train_size=0.7, val_size=0.15):
     """
     Split data and organize images into train/val/test folders with hierarchical structure
@@ -110,107 +88,198 @@ def create_data_splits(df_with_images,base_dir='data/processed/images',train_siz
     print ('Done Creating directories')
     # Create splits
     try:
-        # Stratify by both fitzpatrick_scale and three_partition_label if possible
-        # To help identify classification: benign, non-neoplastic, malignant
+    # Stratify by both fitzpatrick_scale and three_partition_label if possible
         if 'three_partition_label' in df_with_images.columns:
+            unique_classifications = df_with_images['three_partition_label'].unique()
+            print("Unique classification values:", unique_classifications)
+            
+            # Fix any inconsistencies in classification names
+            if 'non-neoplastic' in unique_classifications:
+                print("Fixing 'non-neoplastic' to 'non_neoplastic'")
+
+            df_with_images['three_partition_label'] = df_with_images['three_partition_label'].replace('non-neoplastic', 'non_neoplastic')
             # Create a combined stratification column
             df_with_images['strat_col'] = df_with_images['fitzpatrick_scale'].astype(str) + '_' + df_with_images['three_partition_label']
             strat_col = 'strat_col'
+            
+            # Check if any stratification class has fewer than 3 samples
+            value_counts = df_with_images[strat_col].value_counts()
+            print("\nStratification column value counts:")
+            print(value_counts)
+            
+            if value_counts.min() < 3:
+                print(f"Warning: Some stratification classes have fewer than 3 samples (minimum: {value_counts.min()}).")
+                print("Falling back to stratifying by fitzpatrick_scale only.")
+                strat_col = 'fitzpatrick_scale'
+                
+                # Double-check fitzpatrick_scale counts
+                fitz_counts = df_with_images['fitzpatrick_scale'].value_counts()
+                print("\nFitzpatrick scale value counts:")
+                print(fitz_counts)
+                
+                if fitz_counts.min() < 3:
+                    print(f"Warning: Some Fitzpatrick scale values have fewer than 3 samples (minimum: {fitz_counts.min()}).")
+                    print("Cannot stratify. Using random split instead.")
+                    strat_col = None
         else:
             strat_col = 'fitzpatrick_scale'
-
-        train_df, temp_df = train_test_split(
-            df_with_images,
-            train_size=train_size,
-            stratify=df_with_images[strat_col],
-            random_state=42
-        )
+            
+        # Check fitzpatrick_scale counts
+        fitz_counts = df_with_images['fitzpatrick_scale'].value_counts()
+        print("\nFitzpatrick scale value counts:")
+        print(fitz_counts)
         
-        val_size_adjusted = val_size / (1 - train_size)
-        val_df, test_df = train_test_split(
-            temp_df,
-            train_size=val_size_adjusted,
-            stratify=temp_df[strat_col],
-            random_state=42
-        )
+        if fitz_counts.min() < 3:
+            print(f"Warning: Some Fitzpatrick scale values have fewer than 3 samples (minimum: {fitz_counts.min()}).")
+            print("Cannot stratify. Using random split instead.")
+            strat_col = None
+
+        # Replace the train_test_split calls (around line 170-180) with this:
+        if strat_col is not None:
+            train_df, temp_df = train_test_split(
+                df_with_images,
+                train_size=train_size,
+                stratify=df_with_images[strat_col],
+                random_state=42
+            )
+            
+            val_size_adjusted = val_size / (1 - train_size)
+            val_df, test_df = train_test_split(
+                temp_df,
+                train_size=val_size_adjusted,
+                stratify=temp_df[strat_col],
+                random_state=42
+            )
+        else:
+            # Fall back to random split if stratification isn't possible
+            print("Using random split without stratification")
+            train_df, temp_df = train_test_split(
+                df_with_images,
+                train_size=train_size,
+                random_state=42
+            )
+            
+            val_size_adjusted = val_size / (1 - train_size)
+            val_df, test_df = train_test_split(
+                temp_df,
+                train_size=val_size_adjusted,
+                random_state=42
+            )
+
         
         print("\nInitial split completed:")
         print(f"Training set: {len(train_df)} images")
         print(f"Validation set: {len(val_df)} images")
         print(f"Test set: {len(test_df)} images")
-
-        # Return here if you just want to test the splitting
-        return train_df, val_df, test_df
         
     except Exception as e:
         print(f"Error during splitting: {str(e)}")
         return None, None, None
 
-    # # Move images to hierarchical folders
-    # for split_name, split_df in [('train', train_df), ('val', val_df), ('test', test_df)]:
-    #     split_dir = os.path.join(base_dir, split_name)
-    #     print(f"\nOrganizing images in {split_name} folder...")
+    # Move images to hierarchical folders
+    for split_name, split_df in [('train', train_df), ('val', val_df), ('test', test_df)]:
+        split_dir = os.path.join(base_dir, split_name)
+        print(f"\nOrganizing images in {split_name} folder...")
         
-    #     new_paths = []
-    #     for _, row in tqdm(split_df.iterrows(), total=len(split_df)):
-    #         try:
-    #             src_path = row['image_path']
+        new_paths = []
+
+        print(f"Total images to organize: {len(split_df)}")
+
+        for _, row in tqdm(split_df.iterrows(), total=len(split_df)):
+            try:
+                src_path = row['image_path']
                 
-    #             # Get classification category (benign/malignant/non_neoplastic)
-    #             if 'three_partition_label' in row:
-    #                 classification = row['three_partition_label']
-    #             else:
-    #                 # Default to non_neoplastic if not specified
-    #                 classification = 'non_neoplastic'
+                # Get classification category (benign/malignant/non_neoplastic)
+                if 'three_partition_label' in row:
+                    classification = row['three_partition_label']
+                else:
+                    # Default to non_neoplastic if not specified
+                    classification = 'non_neoplastic'
                 
-    #             # Get condition (label) and skin type
-    #             condition = row['label'].replace('/', '_').replace(' ', '_')
-    #             skin_type = f"type_{row['fitzpatrick_scale']}"
+                # Get condition (label) and skin type
+                condition = row['label'].replace('/', '_').replace(' ', '_')
+                skin_type = f"type_{row['fitzpatrick_scale']}"
                 
-    #             # Create condition directory if it doesn't exist
-    #             condition_dir = os.path.join(split_dir, classification, condition)
-    #             os.makedirs(condition_dir, exist_ok=True)
+                # Create condition directory if it doesn't exist
+                condition_dir = os.path.join(split_dir, classification, condition)
+                os.makedirs(condition_dir, exist_ok=True)
                 
-    #             # Create skin type directory if it doesn't exist
-    #             skin_type_dir = os.path.join(condition_dir, skin_type)
-    #             os.makedirs(skin_type_dir, exist_ok=True)
+                # Create skin type directory if it doesn't exist
+                skin_type_dir = os.path.join(condition_dir, skin_type)
+                os.makedirs(skin_type_dir, exist_ok=True)
                 
-    #             # Define destination path
-    #             dst_path = os.path.join(skin_type_dir, f"{row['md5hash']}.jpg")
+                # Define destination path
+                dst_path = os.path.join(skin_type_dir, f"{row['md5hash']}.jpg")
                 
-    #             # Copy the file if it exists
-    #             if os.path.exists(src_path):
-    #                 if not os.path.exists(dst_path):
-    #                     shutil.copy2(src_path, dst_path)
-    #                 new_paths.append(dst_path)
-    #             else:
-    #                 print(f"Warning: Source image not found: {src_path}")
-    #                 new_paths.append(None)
-    #         except Exception as e:
-    #             print(f"Error organizing image {row.get('md5hash', 'unknown')}: {str(e)}")
-    #             new_paths.append(None)
+                # Copy the file if it exists
+                if os.path.exists(src_path):
+                    if not os.path.exists(dst_path):
+                        shutil.copy2(src_path, dst_path)
+                    new_paths.append(dst_path)
+                else:
+                    print(f"Warning: Source image not found: {src_path}")
+                    new_paths.append(None)
+            except Exception as e:
+                print(f"Error organizing image {row.get('md5hash', 'unknown')}: {str(e)}")
+                new_paths.append(None)
         
-    #     # Update image paths in DataFrame
-    #     split_df['image_path'] = new_paths
-    #     split_df = split_df.dropna(subset=['image_path'])
+        # Update image paths in DataFrame
+        split_df['image_path'] = new_paths
+        split_df = split_df.dropna(subset=['image_path'])
 
-    # # Save splits to CSV
-    # for split_name, split_df in [('train', train_df), ('val', val_df), ('test', test_df)]:
-    #     split_df.to_csv(os.path.join(self.base_dir, f'{split_name}_split.csv'), index=False)
-    #     print(f"Saved {split_name}_split.csv with {len(split_df)} records")
+        print("TESTING IF IMAGES ARE MOVED")
+    # Save splits to CSV
+    for split_name, split_df in [('train', train_df), ('val', val_df), ('test', test_df)]:
+        split_df.to_csv(os.path.join(base_dir, f'{split_name}_split.csv'), index=False)
+        print(f"Saved {split_name}_split.csv with {len(split_df)} records")
 
-    # # Print final directory structure summary
-    # print("\nFinal directory structure created:")
-    # for split in ['train', 'val', 'test']:
-    #     split_dir = os.path.join(self.base_dir, split)
-    #     classifications = os.listdir(split_dir)
-    #     for classification in classifications:
-    #         class_dir = os.path.join(split_dir, classification)
-    #         if os.path.isdir(class_dir):
-    #             conditions = os.listdir(class_dir)
-    #             print(f"  {split}/{classification}: {len(conditions)} conditions")
+    # Print final directory structure summary
+    print("\nFinal directory structure created:")
+    for split in ['train', 'val', 'test']:
+        split_dir = os.path.join(base_dir, split)
+        classifications = os.listdir(split_dir)
+        for classification in classifications:
+            class_dir = os.path.join(split_dir, classification)
+            if os.path.isdir(class_dir):
+                conditions = os.listdir(class_dir)
+                print(f"  {split}/{classification}: {len(conditions)} conditions")
 
-    # return train_df, val_df, test_df
+    #Cleanup all images after moving to split folders
+    def cleanup_base_directory(base_dir, train_df, val_df, test_df):
+        """
+        Remove original images from base directory after they've been copied to split folders
+        """
+        print("\nCleaning up base directory...")
+        
+        # Get all md5hashes that have been processed
+        all_hashes = set()
+        for df in [train_df, val_df, test_df]:
+            all_hashes.update(df['md5hash'])
+        
+        # Count files removed
+        removed_count = 0
+        
+        # Remove files from base directory
+        for filename in os.listdir(base_dir):
+            if filename.endswith('.jpg'):
+                # Extract md5hash from filename
+                md5hash = filename.replace('.jpg', '')
+                
+                # If this file has been processed, remove it
+                if md5hash in all_hashes:
+                    file_path = os.path.join(base_dir, filename)
+                    try:
+                        os.remove(file_path)
+                        removed_count += 1
+                    except Exception as e:
+                        print(f"Error removing {filename}: {str(e)}")
+        
+        print(f"Removed {removed_count} original images from base directory")
+
+        cleanup_base_directory(base_dir, train_df, val_df, test_df)
+
+    return train_df, val_df, test_df
+    
 
 # Main function to test the code
 def main():

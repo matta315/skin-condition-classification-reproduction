@@ -5,10 +5,11 @@ A reproduction study examining AI bias in dermatology classification across diff
 This reproduction study focuses on evaluating how deep learning models perform in classifying skin conditions across different skin types using the Fitzpatrick 17k Dataset. Our goal is to reproduce the paper's key findings about AI bias in dermatology classification across different skin types.
 
 There are going to be 4 stages of the project
-Stage 1:
-Stage 2:
-Stage 3:
-Stage 4:
+Stage 1: Basic Classifier : Model similar to 
+Stage 2: Skin Type analysis
+Stage 3: Multi-class Classification
+Stage 4: Compare Light and Dark Skin Performance
+Stage 5: Add ITA Analysis
 
 ### Key Components
 - Implementation of VGG-16 based classification model

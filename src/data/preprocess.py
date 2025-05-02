@@ -343,5 +343,5 @@ def main():
                 print("\nTest set:")
                 print(test_df['three_partition_label'].value_counts())
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

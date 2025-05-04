@@ -5,7 +5,7 @@ A reproduction study examining AI bias in dermatology classification across diff
 This reproduction study focuses on evaluating how deep learning models perform in classifying skin conditions across different skin types using the Fitzpatrick 17k Dataset. Our goal is to reproduce the paper's key findings about AI bias in dermatology classification across different skin types.
 
 There are going to be 4 stages of the project
-Stage 1: Basic Classifier : Model similar to 
+Stage 1: Basic Classifier  
 Stage 2: Skin Type analysis
 Stage 3: Multi-class Classification
 Stage 4: Compare Light and Dark Skin Performance
@@ -31,36 +31,6 @@ Stage 5: Add ITA Analysis
 - Paper URL: https://arxiv.org/abs/2104.09957
 - Data URL: https://github.com/mattgroh/fitzpatrick17k/blob/main/fitzpatrick17k.csv
 
-## Repository Structure
-```skin-condition-classification-reproduction/
-skin-condition-classification-reproduction/
-├── lib/                              
-│   ├── data/                         # Downloaded Fitzpatrick17k dataset
-│   └── weights/                      # Saved model weights
-│
-├── notebooks/
-│   ├── 1_data_preparation.ipynb      # Data loading and preprocessing
-│   ├── 2_model_implementation.ipynb  # VGG16 model implementation
-│   ├── 3_training_evaluation.ipynb   # Training and basic evaluation
-│   └── 4_fitzpatrick_analysis.ipynb  # Skin type specific analysis
-│
-├── src/
-│   ├── data/
-│   │   ├── data_loader.py           # Data loading utilities
-│   │   └── transforms.py            # Image transformations
-│   │
-│   ├── models/
-│   │   ├── vgg16_model.py          # VGG16 model architecture
-│   │   └── training.py             # Training functions
-│   │
-│   └── evaluation/
-│       ├── metrics.py              # Evaluation metrics
-│       └── fitzpatrick_analyzer.py # Skin type analysis
-│
-├── requirements.txt
-└── README.md
-
-
 ## Requirements
 
 To install requirements:
@@ -73,14 +43,30 @@ python3 -m venv venv
 source venv/bin/activate && pip install panda
 ```
 
->📋  Describe how to set up the environment, e.g. pip/conda/docker commands, download datasets, etc...
-
 ## Data Processing:
+
+The processing stored under ```src\preprocess.py```
+
 Under src/data there are 2 functions to help processing source data **fitzatrick17k.csv**
 - Download full set of data
 - Splitting data into 3 different folders: test, train and val
 
+**To Remove all image**
+
+```
+python src/utils/remove_images.py --directory /Users/mmnguyen/Documents/Matta_local_code/skin-condition-classification-reproduction --execute --include-data
+```
+
 ## Training
+
+### Model 1 - Classification
+
+### Model 2 - SkinType Analysis
+
+Focusing on 3 main skin disease labels:
+- psoriasis
+- squamous cell carcinoma
+- lichen planus
 
 To train the model(s) in the paper, run this command:
 

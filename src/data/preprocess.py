@@ -82,7 +82,7 @@ def create_data_splits(df_with_images,base_dir='data/processed/images',train_siz
         print(f"Created directory: {split_dir}")
         
         # Create classification directories within each split
-        for classification in ['benign', 'malignant', 'non_neoplastic']:
+        for classification in ['benign', 'malignant', 'non-neoplastic']:
             class_dir = os.path.join(split_dir, classification)
             os.makedirs(class_dir, exist_ok=True)
     print ('Done Creating directories')
@@ -93,11 +93,11 @@ def create_data_splits(df_with_images,base_dir='data/processed/images',train_siz
             unique_classifications = df_with_images['three_partition_label'].unique()
             print("Unique classification values:", unique_classifications)
             
-            # Fix any inconsistencies in classification names
-            if 'non-neoplastic' in unique_classifications:
-                print("Fixing 'non-neoplastic' to 'non_neoplastic'")
+            # # Fix any inconsistencies in classification names
+            # if 'non-neoplastic' in unique_classifications:
+            #     print("Fixing 'non-neoplastic' to 'non_neoplastic'")
 
-            df_with_images['three_partition_label'] = df_with_images['three_partition_label'].replace('non-neoplastic', 'non_neoplastic')
+            # df_with_images['three_partition_label'] = df_with_images['three_partition_label'].replace('non-neoplastic', 'non_neoplastic')
             # Create a combined stratification column
             df_with_images['strat_col'] = df_with_images['fitzpatrick_scale'].astype(str) + '_' + df_with_images['three_partition_label']
             strat_col = 'strat_col'
@@ -254,25 +254,29 @@ def create_data_splits(df_with_images,base_dir='data/processed/images',train_siz
         # Get all md5hashes that have been processed
         all_hashes = set()
         for df in [train_df, val_df, test_df]:
-            all_hashes.update(df['md5hash'])
+            if df is not None:
+                all_hashes.update(df['md5hash'])
         
         # Count files removed
         removed_count = 0
         
+        # List files in base directory
+        base_files = [f for f in os.listdir(base_dir) if f.endswith('.jpg') and os.path.isfile(os.path.join(base_dir, f))]
+        print(f"Found {len(base_files)} jpg files in base directory")
+        
         # Remove files from base directory
-        for filename in os.listdir(base_dir):
-            if filename.endswith('.jpg'):
-                # Extract md5hash from filename
-                md5hash = filename.replace('.jpg', '')
-                
-                # If this file has been processed, remove it
-                if md5hash in all_hashes:
-                    file_path = os.path.join(base_dir, filename)
-                    try:
-                        os.remove(file_path)
-                        removed_count += 1
-                    except Exception as e:
-                        print(f"Error removing {filename}: {str(e)}")
+        for filename in base_files:
+            # Extract md5hash from filename
+            md5hash = filename.replace('.jpg', '')
+            
+            # If this file has been processed, remove it
+            if md5hash in all_hashes:
+                file_path = os.path.join(base_dir, filename)
+                try:
+                    os.remove(file_path)
+                    removed_count += 1
+                except Exception as e:
+                    print(f"Error removing {filename}: {str(e)}")
         
         print(f"Removed {removed_count} original images from base directory")
 
@@ -282,66 +286,66 @@ def create_data_splits(df_with_images,base_dir='data/processed/images',train_siz
     
 
 # Main function to test the code
-def main():
-    # Set paths
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.abspath(os.path.join(current_dir, '..', '..'))
+# def main():
+#     # Set paths
+#     current_dir = os.path.dirname(os.path.abspath(__file__))
+#     project_root = os.path.abspath(os.path.join(current_dir, '..', '..'))
     
-    # Set paths relative to project root
-    csv_path = os.path.join(project_root, 'data', 'raw', 'fitzpatrick17k.csv')
-    base_dir = os.path.join(project_root, 'data', 'processed', 'images')
+#     # Set paths relative to project root
+#     csv_path = os.path.join(project_root, 'data', 'raw', 'fitzpatrick17k.csv')
+#     base_dir = os.path.join(project_root, 'data', 'processed', 'images')
     
-    # Create base directory if it doesn't exist
-    os.makedirs(base_dir, exist_ok=True)
+#     # Create base directory if it doesn't exist
+#     os.makedirs(base_dir, exist_ok=True)
     
-    # Step 1: Load the CSV file
-    print(f"Loading data from {csv_path}")
-    df = pd.read_csv(csv_path)
-    #df = df.iloc[0:5]
-    df = df[df['label'] == 'psoriasis']
-    print(f"Loaded {len(df)} records from CSV")
-    print(df)
+#     # Step 1: Load the CSV file
+#     print(f"Loading data from {csv_path}")
+#     df = pd.read_csv(csv_path)
+#     #df = df.iloc[0:5]
+#     df = df[df['label'] == 'psoriasis']
+#     print(f"Loaded {len(df)} records from CSV")
+#     print(df)
     
-    # # Step 2: Download images (optional - can be skipped if already downloaded)
-    # download_option = input("Download images? (y/n): ").lower()
-    # if download_option == 'y':
-    #     successful_downloads = download_dataset_images(df, base_dir)
-    #     print(f"Successfully downloaded {len(successful_downloads)} images")
+#     # # Step 2: Download images (optional - can be skipped if already downloaded)
+#     # download_option = input("Download images? (y/n): ").lower()
+#     # if download_option == 'y':
+#     #     successful_downloads = download_dataset_images(df, base_dir)
+#     #     print(f"Successfully downloaded {len(successful_downloads)} images")
     
-    # Step 3: Update DataFrame with image paths
-    df_with_images = update_df_with_image_paths(df, base_dir)
-    print(f"Total samples with images: {len(df_with_images)}")
+#     # Step 3: Update DataFrame with image paths
+#     df_with_images = update_df_with_image_paths(df, base_dir)
+#     print(f"Total samples with images: {len(df_with_images)}")
     
-    # Step 4: Create data splits and organize images
-    split_option = input("Create data splits and organize images? (y/n): ").lower()
-    if split_option == 'y':
-        train_df, val_df, test_df = create_data_splits(df_with_images, base_dir)
+#     # Step 4: Create data splits and organize images
+#     split_option = input("Create data splits and organize images? (y/n): ").lower()
+#     if split_option == 'y':
+#         train_df, val_df, test_df = create_data_splits(df_with_images, base_dir)
         
-        # Print summary
-        if train_df is not None:
-            print("\nData preparation completed successfully!")
-            print(f"Training set: {len(train_df)} images")
-            print(f"Validation set: {len(val_df)} images")
-            print(f"Test set: {len(test_df)} images")
+#         # Print summary
+#         if train_df is not None:
+#             print("\nData preparation completed successfully!")
+#             print(f"Training set: {len(train_df)} images")
+#             print(f"Validation set: {len(val_df)} images")
+#             print(f"Test set: {len(test_df)} images")
             
-            # Print distribution of skin types in each split
-            print("\nFitzpatrick scale distribution:")
-            print("Training set:")
-            print(train_df['fitzpatrick_scale'].value_counts().sort_index())
-            print("\nValidation set:")
-            print(val_df['fitzpatrick_scale'].value_counts().sort_index())
-            print("\nTest set:")
-            print(test_df['fitzpatrick_scale'].value_counts().sort_index())
+#             # Print distribution of skin types in each split
+#             print("\nFitzpatrick scale distribution:")
+#             print("Training set:")
+#             print(train_df['fitzpatrick_scale'].value_counts().sort_index())
+#             print("\nValidation set:")
+#             print(val_df['fitzpatrick_scale'].value_counts().sort_index())
+#             print("\nTest set:")
+#             print(test_df['fitzpatrick_scale'].value_counts().sort_index())
             
-            # Print distribution of classifications in each split
-            if 'three_partition_label' in train_df.columns:
-                print("\nClassification distribution:")
-                print("Training set:")
-                print(train_df['three_partition_label'].value_counts())
-                print("\nValidation set:")
-                print(val_df['three_partition_label'].value_counts())
-                print("\nTest set:")
-                print(test_df['three_partition_label'].value_counts())
+#             # Print distribution of classifications in each split
+#             if 'three_partition_label' in train_df.columns:
+#                 print("\nClassification distribution:")
+#                 print("Training set:")
+#                 print(train_df['three_partition_label'].value_counts())
+#                 print("\nValidation set:")
+#                 print(val_df['three_partition_label'].value_counts())
+#                 print("\nTest set:")
+#                 print(test_df['three_partition_label'].value_counts())
 
-# if __name__ == "__main__":
-#     main()
+# # if __name__ == "__main__":
+# #     main()

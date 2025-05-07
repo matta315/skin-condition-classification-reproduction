@@ -11,8 +11,17 @@ Stage 3: Multi-class Classification
 Stage 4: Compare Light and Dark Skin Performance
 Stage 5: Add ITA Analysis
 
+#### Hyperparameters
+LEARNING_RATE = 0.0001
+BATCH_SIZE = 32
+IMAGE_SIZE = 128
+NUM_EPOCHS = 5
+DROPOUT_RATE = 0.5
+WEIGHT_DECAY = 1e-5
+DATA_AUGMENTATION = True  # Whether to use data augmentation
+
 ### Key Components
-- Implementation of VGG-16 based classification model
+- Implementation of similar model of VGG-16 based classification model
 - Analysis across different Fitzpatrick skin types
 - Evaluation of model performance on various skin conditions
 - Reproduction of key metrics and results

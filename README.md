@@ -1,5 +1,5 @@
 # skin-condition-classification-reproduction
-A reproduction study examining AI bias in dermatology classification across different skin types using the Fitzpatrick 17k Dataset. Implements VGG-16 based model to evaluate how deep learning performance varies across skin colors, reproducing key findings from Groh et al.'s 2021 paper.
+This reproduction study investigates AI bias in dermatology classification across different skin types by implementing VGG-16 based models on the Fitzpatrick 17k Dataset containing 16,577 clinical images spanning 114 skin conditions. Our primary models include a binary classifier that distinguishes between malignant and non-malignant conditions with 90.4% accuracy, and a skin type analysis model that evaluates performance disparities between light and dark skin tones. Through this work, we aim to reproduce and validate key findings from Groh et al.'s 2021 paper, highlighting how deep learning performance varies across the Fitzpatrick skin type spectrum and contributing to more equitable AI applications in dermatology.
 
 ## Project Overview
 This reproduction study focuses on evaluating how deep learning models perform in classifying skin conditions across different skin types using the Fitzpatrick 17k Dataset. Our goal is to reproduce the paper's key findings about AI bias in dermatology classification across different skin types.

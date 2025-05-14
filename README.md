@@ -4,7 +4,7 @@ This reproduction study investigates AI bias in dermatology classification acros
 ## Project Overview
 This reproduction study focuses on evaluating how deep learning models perform in classifying skin conditions across different skin types using the Fitzpatrick 17k Dataset. Our goal is to reproduce the paper's key findings about AI bias in dermatology classification across different skin types.
 
-There are going to be 4 stages of the project
+There are going to be 5 stages of the project
 Simple Model: Basic Classifier  
 Stage 2: Skin Type analysis
 Stage 3: Multi-class Classification

@@ -90,9 +90,7 @@ Focusing on 3 main skin disease labels:
 
 To train the model(s) in the paper, run this command:
 
-```torch.save(model.state_dict(), 'fitpatrick_reproduce_model.pth')
-```
-
+```torch.save(model.state_dict(), 'fitpatrick_reproduce_model.pth')```
 
 ## Evaluation
 
